@@ -15,7 +15,7 @@ namespace laba12._2
 
             var rect = new Rectangle1(5, 10) { Name = "Прямоугольник1" };
             var circle = new Circle1(7) { Name = "Круг1" };
-            var parallelepiped = new Parallelepiped1(3) { Name = "Параллелепипед1" };
+            var parallelepiped = new Parallelepiped1(3, 4,5 ) { Name = "Параллелепипед1" };
 
             // 1. Добавление элементов с контролем коэффициента заполненности
             hashTable.AddWithLoadFactorCheck("rect1", rect);
