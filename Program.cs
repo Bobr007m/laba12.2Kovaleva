@@ -17,7 +17,7 @@ namespace HashTableDemo
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("=== МЕНЮ ДЕМОНСТРАЦИИ ХЕШ-ТАБЛИЦЫ ===");
+                Console.WriteLine("МЕНЮ ДЕМОНСТРАЦИИ ХЕШ-ТАБЛИЦЫ ");
                 Console.WriteLine("1. Заполнить таблицу случайными фигурами");
                 Console.WriteLine("2. Показать содержимое таблицы");
                 Console.WriteLine("3. Найти фигуру по ключу");
