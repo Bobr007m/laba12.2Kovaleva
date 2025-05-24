@@ -17,7 +17,7 @@ namespace laba12._2
         public int Count => count;
 
         // Коэффициент заполненности таблицы
-        private double LoadFactor => (double)count / MyHashtable.Length;
+        public double LoadFactor => (double)count / MyHashtable.Length;
 
         public bool IsReadOnly => throw new NotImplementedException();
         public string Key { get; set; }
