@@ -111,8 +111,11 @@ namespace laba12._2
         // Получение значения по ключу
         public bool TryGetValue (TKey key, out TValue value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            if (key == null || Count == 0)
+            {
+                value = default;
+                return false;
+            }
 
             int index = Math.Abs(key.GetHashCode()) % table.Length;
 

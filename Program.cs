@@ -17,7 +17,6 @@ class Program
             Console.WriteLine("3. Удалить элемент");
             Console.WriteLine("4. Вывести таблицу");
             Console.WriteLine("5. Заполнить случайными фигурами");
-            Console.WriteLine("6. Демонстрация переполнения таблицы");
             Console.WriteLine("0. Выход");
             Console.Write("Выберите действие: ");
 
@@ -42,9 +41,6 @@ class Program
                     case "5":
                         FillRandomly(table, rand);
                         break;
-                    case "6":
-                        DemonstrateOverflow(table);
-                        break;
                     case "0":
                         return;
                     default:
@@ -61,7 +57,7 @@ class Program
             Console.ReadLine();
         }
     }
-
+    static int GetRandomSize() => new Random().Next(1, 10);
     static void AddElementManually(MyHashTable<string, Geometryfigure1> table)
     {
         Console.Write("Введите ключ: ");
@@ -167,57 +163,57 @@ class Program
         }
 
         Console.WriteLine($"Добавлено {count} элементов");
-    }
+            // Создаем маленькую хеш-таблицу с низким порогом заполнения для демонстрации
+        var table1 = new MyHashTable<string, Geometryfigure1>(capacity: 3, loadFactor: 0.7);
+        Console.WriteLine("Создана хеш-таблица с начальной емкостью 3 и порогом заполнения 0.7");
 
-    static int GetRandomSize() => new Random().Next(1, 10);
-    /// <summary>
-    /// Метод для демонстрации поведения при попытке добавления в переполненную таблицу
-    /// </summary>
-    static void DemonstrateOverflow(MyHashTable<string, Geometryfigure1> hashTable)
-    {
-        Console.WriteLine("\nДЕМОНСТРАЦИЯ ПОВЕДЕНИЯ ХЭШ-ТАБЛИЦЫ ПРИ ПЕРЕПОЛНЕНИИ ");
+        // Добавляем элементы до достижения порога
+        Console.WriteLine("\n1. Добавляем элементы до достижения порога заполнения:");
+        table.Add("circle1", new Circle1(5));
+        Console.WriteLine($"Добавлен circle1. Текущий коэффициент заполнения: {table1.LoadFactor:P0}");
+        table.Add("rect1", new Rectangle1(3, 4));
+        Console.WriteLine($"Добавлен rect1. Текущий коэффициент заполнения: {table1.LoadFactor:P0}");
 
+        // Выводим текущее состояние таблицы
+        Console.WriteLine("\nТекущее состояние таблицы:");
+        Console.WriteLine(table.GetTableInfo());
+
+        // Пытаемся добавить элемент, который вызовет расширение таблицы
+        Console.WriteLine("\n2. Пытаемся добавить третий элемент (должен вызвать Resize):");
         try
         {
-            // Устанавливаем фиксированную ёмкость для демонстрации
-            int initialCapacity = 2;
-            double loadFactor = 0.72;
-
-            Console.WriteLine($"Создаём таблицу с начальной ёмкостью {initialCapacity} и коэффициентом заполнения {loadFactor}");
-            hashTable = new MyHashTable<string, Geometryfigure1>(initialCapacity, loadFactor);
-
-            // Добавляем первый элемент
-            Console.WriteLine("Добавляем первый элемент...");
-            hashTable.Add("Фигура_1", new Rectangle1(1, 1));
-            hashTable.GetTableInfo();
-
-            // Добавляем второй элемент
-            Console.WriteLine("Добавляем второй элемент...");
-            hashTable.Add("Фигура_2", new Circle1(1));
-            hashTable.GetTableInfo();
-
-            // Третий элемент должен вызвать Resize()
-            Console.WriteLine("Добавляем третий элемент — должно произойти автоматическое расширение...");
-            hashTable.Add("Фигура_3", new Parallelepiped1(1, 1, 1));
-            hashTable.GetTableInfo();
-
-            // Попробуем добавить ещё один элемент
-            Console.WriteLine("Добавляем четвёртый элемент...");
-            hashTable.Add("Фигура_4", new Rectangle1(2, 2));
-            hashTable.GetTableInfo();
-
-            Console.WriteLine("\nВсе элементы успешно добавлены.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine($"\nОшибка: {ex.Message}");
-            Console.WriteLine("Таблица достигла максимальной ёмкости или не поддерживает автоматическое расширение.");
+            table.Add("paral1", new Parallelepiped1(2, 3, 4));
+            Console.WriteLine($"Добавлен paral1. Текущий коэффициент заполнения: {table.LoadFactor:P0}");
+            Console.WriteLine("\nСостояние таблицы после расширения:");
+            Console.WriteLine(table.GetTableInfo());
+            Console.WriteLine("Размер таблицы увеличился автоматически!");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"\nПроизошла ошибка: {ex.Message}");
+            Console.WriteLine($"Ошибка: {ex.Message}");
         }
 
-        Console.WriteLine("\nЗАВЕРШЕНИЕ ДЕМОНСТРАЦИИ ");
+        // Теперь попробуем заполнить таблицу до предела
+        Console.WriteLine("\n3. Пытаемся заполнить таблицу до предела:");
+        try
+        {
+            // Добавляем элементы, пока не возникнет ошибка
+            for (int i = 0; i < 10; i++)
+            {
+                string key = $"item{i}";
+                table.Add(key, new Circle1(i + 1));
+                Console.WriteLine($"Добавлен {key}. Коэффициент: {table.LoadFactor:P0}");
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"\nОшибка при добавлении: {ex.Message}");
+            Console.WriteLine("Достигнут максимальный размер таблицы!");
+        }
+
+        // Выводим финальное состояние таблицы
+        Console.WriteLine("\nФинальное состояние таблицы:");
+        Console.WriteLine(table.GetTableInfo());
     }
 }
+
