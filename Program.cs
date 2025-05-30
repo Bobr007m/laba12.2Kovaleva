@@ -1,219 +1,223 @@
 ﻿using Geometryclass;
 using laba12._2;
 using System;
-using System.Collections.Generic;
 
-namespace HashTableDemo
+class Program
 {
-    class Program
+    static void Main()
     {
-        static Random rand = new Random();
+        var table = new MyHashTable<string, Geometryfigure1>();
+        var rand = new Random();
 
-        static void Main(string[] args)
+        while (true)
         {
-            // Создаем хеш-таблицу с начальным размером 5
-            var hashTable = new MyHashTable<Geometryfigure1>(5);
+            Console.Clear();
+            Console.WriteLine("1. Добавить элемент");
+            Console.WriteLine("2. Найти элемент");
+            Console.WriteLine("3. Удалить элемент");
+            Console.WriteLine("4. Вывести таблицу");
+            Console.WriteLine("5. Заполнить случайными фигурами");
+            Console.WriteLine("6. Демонстрация переполнения таблицы");
+            Console.WriteLine("0. Выход");
+            Console.Write("Выберите действие: ");
 
-            while (true)
+            var choice = Console.ReadLine();
+
+            try
             {
-                Console.Clear();
-                Console.WriteLine("МЕНЮ ДЕМОНСТРАЦИИ ХЕШ-ТАБЛИЦЫ ");
-                Console.WriteLine("1. Заполнить таблицу случайными фигурами");
-                Console.WriteLine("2. Показать содержимое таблицы");
-                Console.WriteLine("3. Найти фигуру по ключу");
-                Console.WriteLine("4. Удалить фигуру по ключу");
-                Console.WriteLine("5. Очистить таблицу");
-                Console.WriteLine("6. Демонстрация поведения при переполнении");
-                Console.WriteLine("0. Выход");
-                Console.Write("Выберите действие: ");
-
-                string choice = Console.ReadLine();
-
                 switch (choice)
                 {
                     case "1":
-                        FillWithRandomFigures(hashTable);
+                        AddElementManually(table);
                         break;
                     case "2":
-                        ShowHashTable(hashTable);
+                        FindElement(table);
                         break;
                     case "3":
-                        FindFigure(hashTable);
+                        RemoveElement(table);
                         break;
                     case "4":
-                        RemoveFigure(hashTable);
+                        Console.WriteLine(table.GetTableInfo());
                         break;
                     case "5":
-                        hashTable = new MyHashTable<Geometryfigure1>(5);
-                        Console.WriteLine("Таблица очищена.");
+                        FillRandomly(table, rand);
                         break;
                     case "6":
-                        DemonstrateOverflow(hashTable);
+                        DemonstrateOverflow(table);
                         break;
                     case "0":
                         return;
                     default:
-                        Console.WriteLine("Ошибка: Неверный выбор!");
+                        Console.WriteLine("Неверный выбор");
                         break;
                 }
-
-                Console.WriteLine("\nНажмите любую клавишу для продолжения...");
-                Console.ReadKey();
-            }
-        }
-
-        static void FillWithRandomFigures(MyHashTable<Geometryfigure1> hashTable)
-        {
-            try
-            {
-                Console.Write("Введите количество фигур для добавления: ");
-                string input = Console.ReadLine();
-
-                if (!int.TryParse(input, out int count) || count <= 0)
-                {
-                    Console.WriteLine("Ошибка: Введите положительное число.");
-                    return;
-                }
-
-                Console.WriteLine($"\nДобавление {count} случайных фигур...");
-
-                for (int i = 0; i < count; i++)
-                {
-                    string name = $"Фигура_{i + 1}";
-
-                    int figureType = rand.Next(3);
-                    Geometryfigure1 figure = null;
-
-                    if (figureType == 0)
-                    {
-                        figure = new Rectangle1(rand.Next(1, 10), rand.Next(1, 10)) { Name = name };
-                    }
-                    else if (figureType == 1)
-                    {
-                        figure = new Circle1(rand.Next(1, 10)) { Name = name };
-                    }
-                    else if (figureType == 2)
-                    {
-                        figure = new Parallelepiped1(rand.Next(1, 10), rand.Next(1, 10), rand.Next(1, 10)) { Name = name };
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("Неизвестный тип фигуры");
-                    }
-
-                    try
-                    {
-                        hashTable.AddWithLoadFactorCheck(name, figure);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        Console.WriteLine($"Пропущено (дубликат ключа): {name} — {ex.Message}");
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        Console.WriteLine($"Ошибка при добавлении {name}: {ex.Message}");
-                        Console.WriteLine("Хеш-таблица переполнена. Рассмотрите увеличение ёмкости или удаление старых записей.");
-                        break;
-                    }
-                }
-
-                Console.WriteLine("Добавление завершено.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Произошла ошибка: {ex.Message}");
+                Console.WriteLine($"Ошибка: {ex.Message}");
             }
-        }
 
-        static void ShowHashTable(MyHashTable<Geometryfigure1> hashTable)
+            Console.WriteLine("Нажмите Enter для продолжения...");
+            Console.ReadLine();
+        }
+    }
+
+    static void AddElementManually(MyHashTable<string, Geometryfigure1> table)
+    {
+        Console.Write("Введите ключ: ");
+        var key = Console.ReadLine();
+
+        Console.WriteLine("Выберите тип фигуры (1-Круг, 2-Прямоугольник, 3-Параллелепипед): ");
+        var type = Console.ReadLine();
+
+        Geometryfigure1 figure = null;
+
+        if (type == "1")
         {
-            Console.WriteLine("\nТекущее состояние хеш-таблицы:");
-            hashTable.PrintTable();
+            figure = new Circle1(GetRandomSize());
         }
-
-        static void FindFigure(MyHashTable<Geometryfigure1> hashTable)
+        else if (type == "2")
         {
-            Console.Write("\nВведите ключ (имя фигуры) для поиска: ");
-            string key = Console.ReadLine();
-
-            try
-            {
-                var figure = hashTable.Find(key);
-                Console.WriteLine($"Найдена фигура: {figure.Name} ({figure.GetType().Name})");
-                Console.WriteLine(figure.ToString());
-            }
-            catch (KeyNotFoundException)
-            {
-                Console.WriteLine("Ошибка: Фигура с указанным ключом не найдена!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка поиска: {ex.Message}");
-            }
+            figure = new Rectangle1(GetRandomSize(), GetRandomSize());
         }
-
-        static void RemoveFigure(MyHashTable<Geometryfigure1> hashTable)
+        else if (type == "3")
         {
-            Console.Write("\nВведите ключ (имя фигуры) для удаления: ");
-            string key = Console.ReadLine();
-
-            try
-            {
-                bool removed = hashTable.Remove(key);
-                if (removed)
-                {
-                    Console.WriteLine("Фигура успешно удалена.");
-                    Console.WriteLine("\nСостояние таблицы после удаления:");
-                    hashTable.PrintTable();
-                }
-                else
-                {
-                    Console.WriteLine("Фигура с указанным ключом не найдена или уже удалена.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при удалении: {ex.Message}");
-            }
+            figure = new Parallelepiped1(GetRandomSize(), GetRandomSize(), GetRandomSize());
         }
-
-        //  Метод для демонстрации поведения при переполнении
-        static void DemonstrateOverflow(MyHashTable<Geometryfigure1> hashTable)
+        else
         {
-            Console.WriteLine("\nДемонстрация поведения при попытке добавления в переполненную таблицу...");
-
-            try
-            {
-                // Очищаем таблицу и устанавливаем фиксированный размер
-                hashTable = new MyHashTable<Geometryfigure1>(capacity: 2, loadFactor: 0.72);
-
-                // Добавляем ровно столько, сколько помещается до Resize
-                hashTable.AddWithLoadFactorCheck("Фигура_1", new Rectangle1(1, 1));
-                hashTable.AddWithLoadFactorCheck("Фигура_2", new Circle1(1));
-
-                Console.WriteLine("\nПопытка добавить третий элемент (вызовет Resize)...");
-
-                // Третий элемент должен вызвать Resize()
-                hashTable.AddWithLoadFactorCheck("Фигура_3", new Parallelepiped1(1, 1, 1));
-
-                Console.WriteLine("Третий элемент успешно добавлен после увеличения таблицы.");
-
-                Console.WriteLine("\nПопытка добавить четвёртый элемент (может вызвать исключение)...");
-                hashTable.AddWithLoadFactorCheck("Фигура_4", new Rectangle1(2, 2));
-
-            }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Ошибка при добавлении: {ex.Message}");
-                Console.WriteLine("Таблица не может принять больше элементов.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Произошла ошибка: {ex.Message}");
-            }
-
-            Console.WriteLine("\nСостояние таблицы после попыток:");
-            hashTable.PrintTable();
+            throw new ArgumentException("Неверный тип фигуры");
         }
+
+        table.Add(key, figure);
+        Console.WriteLine("Элемент добавлен");
+    }
+
+    static void FindElement(MyHashTable<string, Geometryfigure1> table)
+    {
+        if (table.Count == 0)
+        {
+            Console.WriteLine("Таблица пуста");
+            return;
+        }
+
+        Console.Write("Введите ключ: ");
+        var key = Console.ReadLine();
+
+        if (table.TryGetValue(key, out var value))
+            Console.WriteLine($"Найдено: {value}");
+        else
+            Console.WriteLine("Элемент не найден");
+    }
+
+    static void RemoveElement(MyHashTable<string, Geometryfigure1> table)
+    {
+        if (table.Count == 0)
+        {
+            Console.WriteLine("Таблица пуста");
+            return;
+        }
+
+        Console.Write("Введите ключ: ");
+        var key = Console.ReadLine();
+
+        if (table.Remove(key))
+            Console.WriteLine("Элемент удален");
+        else
+            Console.WriteLine("Элемент не найден");
+    }
+
+    static void FillRandomly(MyHashTable<string, Geometryfigure1> table, Random rand)
+    {
+        Console.Write("Сколько элементов добавить? ");
+        if (!int.TryParse(Console.ReadLine(), out var count) || count <= 0)
+        {
+            Console.WriteLine("Некорректное число");
+            return;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            // Генерируем уникальный ключ 
+            string key = $"figure_{i}";
+
+            // Создаем случайную фигуру
+            int figureType = rand.Next(1, 4);
+            Geometryfigure1 figure;
+
+            if (figureType == 1)
+            {
+                figure = new Circle1(rand.Next(1, 10));
+            }
+            else if (figureType == 2)
+            {
+                figure = new Rectangle1(rand.Next(1, 10), rand.Next(1, 10));
+            }
+            else if (figureType == 3)
+            {
+                figure = new Parallelepiped1(rand.Next(1, 10), rand.Next(1, 10), rand.Next(1, 10));
+            }
+            else
+            {
+                throw new InvalidOperationException("Неизвестный тип фигуры");
+            }
+
+            // Добавляем элемент в таблицу
+            table.Add(key, figure);
+        }
+
+        Console.WriteLine($"Добавлено {count} элементов");
+    }
+
+    static int GetRandomSize() => new Random().Next(1, 10);
+    /// <summary>
+    /// Метод для демонстрации поведения при попытке добавления в переполненную таблицу
+    /// </summary>
+    static void DemonstrateOverflow(MyHashTable<string, Geometryfigure1> hashTable)
+    {
+        Console.WriteLine("\nДЕМОНСТРАЦИЯ ПОВЕДЕНИЯ ХЭШ-ТАБЛИЦЫ ПРИ ПЕРЕПОЛНЕНИИ ");
+
+        try
+        {
+            // Устанавливаем фиксированную ёмкость для демонстрации
+            int initialCapacity = 2;
+            double loadFactor = 0.72;
+
+            Console.WriteLine($"Создаём таблицу с начальной ёмкостью {initialCapacity} и коэффициентом заполнения {loadFactor}");
+            hashTable = new MyHashTable<string, Geometryfigure1>(initialCapacity, loadFactor);
+
+            // Добавляем первый элемент
+            Console.WriteLine("Добавляем первый элемент...");
+            hashTable.Add("Фигура_1", new Rectangle1(1, 1));
+            hashTable.GetTableInfo();
+
+            // Добавляем второй элемент
+            Console.WriteLine("Добавляем второй элемент...");
+            hashTable.Add("Фигура_2", new Circle1(1));
+            hashTable.GetTableInfo();
+
+            // Третий элемент должен вызвать Resize()
+            Console.WriteLine("Добавляем третий элемент — должно произойти автоматическое расширение...");
+            hashTable.Add("Фигура_3", new Parallelepiped1(1, 1, 1));
+            hashTable.GetTableInfo();
+
+            // Попробуем добавить ещё один элемент
+            Console.WriteLine("Добавляем четвёртый элемент...");
+            hashTable.Add("Фигура_4", new Rectangle1(2, 2));
+            hashTable.GetTableInfo();
+
+            Console.WriteLine("\nВсе элементы успешно добавлены.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"\nОшибка: {ex.Message}");
+            Console.WriteLine("Таблица достигла максимальной ёмкости или не поддерживает автоматическое расширение.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nПроизошла ошибка: {ex.Message}");
+        }
+
+        Console.WriteLine("\nЗАВЕРШЕНИЕ ДЕМОНСТРАЦИИ ");
     }
 }
